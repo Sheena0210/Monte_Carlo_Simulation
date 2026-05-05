@@ -1,0 +1,77 @@
+#延伸:多門問題
+#當門有10扇，只有一個GIFT，主持人會打開羊門直到剩下兩扇門:參賽者選的、一扇未打開的
+
+#三種策略：
+#KEEP：不換門
+#ALWAYS_SWITCH：一開始就決定換門
+#RANDOM：隨機決定要不要換門
+Strategy = Enum("Strategy", ["KEEP", "ALWAYS_SWITCH", "RANDOM"])
+
+def monty_hall_many_doors(strategy, n_doors=10):
+    # 檢查門數是否合理
+    if n_doors < 3:
+        raise ValueError("門數至少要有 3 扇")
+
+    #定義多扇門後面的東西：1個禮物，其餘都是羊
+    behind_doors = ["GIFT"] + ["GOAT"] * (n_doors - 1)
+    #參賽者一開始隨機選一扇門
+    step1 = random.choice(behind_doors)
+    # 先把參賽者選到的那扇門移除
+    behind_doors.pop(behind_doors.index(step1))
+    #主持人打開門直到只剩下一扇門
+    #代表只剩：
+    #1參賽者原本選的門
+    #2另一扇沒有被打開的門
+    while len(behind_doors) > 1:
+        behind_doors.pop(behind_doors.index("GOAT"))
+    
+    # 根據策略決定要不要換門
+    if strategy == Strategy.KEEP:
+        pass
+    elif strategy == Strategy.ALWAYS_SWITCH:
+        step1, behind_doors[0] = behind_doors[0], step1
+    elif strategy == Strategy.RANDOM:
+        if random.choice(["SWAP", "NOSWAP"]) == "SWAP":
+            step1, behind_doors[0] = behind_doors[0], step1
+    # 回傳最後拿到的是禮物還是羊
+    return step1
+
+
+#實驗次數----
+N = 10000
+
+#修改換策略-KEEP(保持不換:拿到禮物的機率=1036/10000=0.1036=1/10)----
+strategy1 = Strategy.KEEP
+#重複模擬 N 次
+results1 = [monty_hall_many_doors(strategy1) for _ in range(N)]
+#結果畫出來
+plt.figure(figsize=(8, 1))
+plt.barh(*np.unique(results1, return_counts=True))
+ax = plt.gca()
+ax.bar_label(ax.containers[0], label_type='edge')
+ax.set_title(strategy1)
+plt.show()
+
+#修改換策略-ALWAYS_SWITCH(換:拿到禮物的機率=9005/10000=0.9005=9/10)----
+strategy2 = Strategy.ALWAYS_SWITCH
+#重複模擬 N 次
+results2 = [monty_hall_many_doors(strategy2) for _ in range(N)]
+#結果畫出來
+plt.figure(figsize=(8, 1))
+plt.barh(*np.unique(results2, return_counts=True))
+ax = plt.gca()
+ax.bar_label(ax.containers[0], label_type='edge')
+ax.set_title(strategy2)
+plt.show()
+
+#修改換策略-RANDOM(隨機5045/10000=0.5045=1/2)----
+strategy3 = Strategy.RANDOM
+#重複模擬
+results3 = [monty_hall_many_doors(strategy3) for _ in range(N)]
+#結果畫出來
+plt.figure(figsize=(8, 1))
+plt.barh(*np.unique(results3, return_counts=True))
+ax = plt.gca()
+ax.bar_label(ax.containers[0], label_type='edge')
+ax.set_title(strategy3)
+plt.show()
